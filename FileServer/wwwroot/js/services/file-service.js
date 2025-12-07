@@ -13,16 +13,16 @@ const FILES_BASE_URL = "/files";
  * Build a /files URL for a given logical path.
  * If no path is supplied, uses the current directory from the URL hash.
  */
-function buildFilesUrlForPath(path) {
+function buildFilesUrlForPath(prefix, path) {
     const effectivePath = (path !== null && path !== void 0 ? path : getCurrentPath()) || "/";
     if (effectivePath === "/" || effectivePath === "") {
         // Root directory
-        return `${FILES_BASE_URL}/`;
+        return `${prefix}/`;
     }
     // Trim leading slash for routing and URL-encode segments
     const trimmed = effectivePath.startsWith("/") ? effectivePath.substring(1) : effectivePath;
     const encoded = trimmed.split("/").map(encodeURIComponent).join("/");
-    return `${FILES_BASE_URL}/${encoded}`;
+    return `${prefix}/${encoded}`;
 }
 /**
  * List files/directories in a directory.
@@ -30,7 +30,7 @@ function buildFilesUrlForPath(path) {
  */
 export function getFiles() {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = buildFilesUrlForPath();
+        const url = buildFilesUrlForPath(FILES_BASE_URL);
         const response = yield fetch(url);
         if (!response.ok) {
             console.error("Failed to fetch files:", response.status, response.statusText);
@@ -48,17 +48,8 @@ export function getFiles() {
  */
 export function deleteEntry(name, directoryPath) {
     return __awaiter(this, void 0, void 0, function* () {
-        let basePath = (directoryPath !== null && directoryPath !== void 0 ? directoryPath : getCurrentPath()) || "/";
-        // Normalize base path
-        if (!basePath.startsWith("/")) {
-            basePath = "/" + basePath;
-        }
-        if (basePath.endsWith("/") && basePath !== "/") {
-            basePath = basePath.slice(0, -1);
-        }
-        // For root, just use "/name"; otherwise "/dir/name"
-        const fullPath = basePath === "/" ? `/${name}` : `${basePath}/${name}`;
-        const url = buildFilesUrlForPath(fullPath);
+        const url = buildFilesUrlForPath(FILES_BASE_URL) + '/' + name;
+        console.log(url);
         const response = yield fetch(url, {
             method: "DELETE"
         });
@@ -66,6 +57,7 @@ export function deleteEntry(name, directoryPath) {
             console.error("Failed to delete entry:", response.status, response.statusText);
             return false;
         }
+        document.dispatchEvent(new Event("files-updated"));
         return true;
     });
 }
@@ -77,10 +69,10 @@ export function deleteEntry(name, directoryPath) {
  */
 export function uploadFile(file, directoryPath) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = buildFilesUrlForPath(directoryPath);
+        const url = buildFilesUrlForPath(FILES_BASE_URL, directoryPath);
         console.log(`Uploading to ${url}`);
         const formData = new FormData();
-        formData.append("files", file);
+        formData.append("file", file);
         const response = yield fetch(url, {
             method: "POST",
             body: formData
@@ -89,7 +81,19 @@ export function uploadFile(file, directoryPath) {
             console.error("Failed to upload file:", response.status, response.statusText);
             return null;
         }
+        document.dispatchEvent(new Event("files-updated"));
         return (yield response.json());
     });
 }
-//# sourceMappingURL=file-service.js.map
+export function downloadFile(fileName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = buildFilesUrlForPath("download") + '/' + fileName;
+        console.log(url);
+        const response = yield fetch(url);
+        if (!response.ok) {
+            console.error("Failed to fetch files:", response.status, response.statusText);
+            return null;
+        }
+        return yield response.blob();
+    });
+}

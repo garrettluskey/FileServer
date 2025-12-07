@@ -17,4 +17,3 @@ function formatScaled(size, divisor, unit) {
     const value = size / divisor;
     return `${value.toFixed(1)} ${unit}`;
 }
-//# sourceMappingURL=formatFileSize.js.map

@@ -1,14 +1,7 @@
 ﻿import { getCurrentPath, getParentPath } from "./directoryHelper.js";
 import formatFileSize from "./formatFileSize.js";
-import { getFiles } from "./services/file-service.js";
-
-// Matches the C# FormattedFileInfo struct as serialized by ASP.NET
-interface FormattedFileInfo {
-    isDirectory: boolean;
-    name: string;
-    size: number;
-}
-
+import { FileInfoModel } from "./models/file-info.js";
+import { deleteEntry, downloadFile, getFiles } from "./services/file-service.js";
 
 
 async function loadAndPopulateGrid(): Promise<void> {
@@ -65,13 +58,8 @@ async function loadAndPopulateGrid(): Promise<void> {
     }
 }
 
-interface FormattedFileInfo {
-    isDirectory: boolean;
-    name: string;
-    size: number;
-}
 
-function createFileRow(item: FormattedFileInfo, currentPath: string): HTMLElement {
+function createFileRow(item: FileInfoModel, currentPath: string): HTMLElement {
     const template = document.getElementById("file-row-template") as HTMLTemplateElement;
     const fragment = template.content.cloneNode(true) as DocumentFragment;
 
@@ -96,7 +84,32 @@ function createFileRow(item: FormattedFileInfo, currentPath: string): HTMLElemen
     if (item.isDirectory) {
         link.href = "#" + fullPath;
     } else {
-        // TODO setup download file
+        // For files, attach a click handler that starts a download
+        link.href = "#"; // Prevent default navigation
+
+        link.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            const blob = await downloadFile(item.name)
+
+            if (blob == null) return;
+
+            // Create a temporary URL for the blob
+            const blobUrl = URL.createObjectURL(blob);
+
+            // Create a hidden <a> element
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = item.name; // Suggests the filename to the browser
+
+            // Add to DOM, trigger click, then remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Clean up object URL
+            URL.revokeObjectURL(blobUrl);
+        });
     }
 
     // Type
@@ -107,6 +120,10 @@ function createFileRow(item: FormattedFileInfo, currentPath: string): HTMLElemen
 
     // Delete Button
     deleteBtn.dataset.path = fullPath;
+
+    deleteBtn.addEventListener("click", async (event) => {
+        await deleteEntry(item.name);
+    });
 
     return row;
 }

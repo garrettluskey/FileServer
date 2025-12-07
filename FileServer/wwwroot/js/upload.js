@@ -36,4 +36,3 @@ function initUploadButton() {
 }
 // Initialize on DOM ready
 document.addEventListener("DOMContentLoaded", initUploadButton);
-//# sourceMappingURL=upload.js.map

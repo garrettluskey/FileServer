@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { getCurrentPath, getParentPath } from "./directoryHelper.js";
 import formatFileSize from "./formatFileSize.js";
-import { getFiles } from "./services/file-service.js";
+import { deleteEntry, downloadFile, getFiles } from "./services/file-service.js";
 function loadAndPopulateGrid() {
     return __awaiter(this, void 0, void 0, function* () {
         const grid = document.getElementById("file-grid");
@@ -71,7 +71,26 @@ function createFileRow(item, currentPath) {
         link.href = "#" + fullPath;
     }
     else {
-        // TODO setup download file
+        // For files, attach a click handler that starts a download
+        link.href = "#"; // Prevent default navigation
+        link.addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
+            event.preventDefault();
+            const blob = yield downloadFile(item.name);
+            if (blob == null)
+                return;
+            // Create a temporary URL for the blob
+            const blobUrl = URL.createObjectURL(blob);
+            // Create a hidden <a> element
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = item.name; // Suggests the filename to the browser
+            // Add to DOM, trigger click, then remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            // Clean up object URL
+            URL.revokeObjectURL(blobUrl);
+        }));
     }
     // Type
     typeSpan.textContent = item.isDirectory ? "📁" : "📄";
@@ -79,6 +98,9 @@ function createFileRow(item, currentPath) {
     sizeSpan.textContent = formatFileSize(item.size);
     // Delete Button
     deleteBtn.dataset.path = fullPath;
+    deleteBtn.addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
+        yield deleteEntry(item.name);
+    }));
     return row;
 }
 // Wire up initial load + refresh button
@@ -95,4 +117,3 @@ document.addEventListener("DOMContentLoaded", () => {
 window.addEventListener("hashchange", loadAndPopulateGrid);
 // Auto refresh on local file update
 document.addEventListener("files-updated", loadAndPopulateGrid);
-//# sourceMappingURL=app.js.map

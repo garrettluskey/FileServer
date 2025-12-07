@@ -9,4 +9,3 @@ export function getParentPath() {
 export function getCurrentPath() {
     return window.location.hash.substring(1);
 }
-//# sourceMappingURL=directoryHelper.js.map

@@ -21,9 +21,9 @@ public class FileController : ControllerBase
     }
 
     // GET /files/{*path}
-    // Gets either a file or a directory information (recursively) under the base path
+    // Returns the contents of a directory
     [HttpGet("{*path}")]
-    public IEnumerable<FormattedFileInfo> Get(string? path)
+    public IActionResult GetContents(string? path)
     {
         // Normalize input path
         path ??= string.Empty;
@@ -36,17 +36,13 @@ public class FileController : ControllerBase
         // Ensure the resolved path is still inside base
         if (!fullPath.StartsWith(_basePathProvider.BasePath, StringComparison.OrdinalIgnoreCase))
         {
-            Response.StatusCode = StatusCodes.Status400BadRequest;
-            return Array.Empty<FormattedFileInfo>();
+            return BadRequest();
         }
+
+        // If it's a directory, return directory contents (current behavior)
+        if (!Directory.Exists(fullPath)) return NotFound();
 
         var directoryInfo = new DirectoryInfo(fullPath);
-
-        if (!directoryInfo.Exists)
-        {
-            Response.StatusCode = StatusCodes.Status404NotFound;
-            return Array.Empty<FormattedFileInfo>();
-        }
 
         var directoryData = directoryInfo
             .EnumerateDirectories()
@@ -66,7 +62,8 @@ public class FileController : ControllerBase
                 Size = x.Length
             });
 
-        return directoryData.Concat(fileData);
+        var result = directoryData.Concat(fileData);
+        return Ok(result);
     }
 
     // DELETE /files/{*path}

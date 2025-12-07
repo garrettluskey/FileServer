@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System.Text;
 
-namespace FileServer.UnitTests.FileControllerTests;
+namespace FileServer.UnitTests;
 
 public class FileControllerTests : IDisposable
 {
@@ -188,7 +188,7 @@ public class FileControllerTests : IDisposable
         // Arrange
         var controller = CreateController();
 
-        var stream = new MemoryStream(new byte[] { 1, 2, 3 });
+        var stream = new MemoryStream([ 1, 2, 3 ]);
         var formFile = new FormFile(stream, 0, stream.Length, "file", "test.bin");
 
         // Act

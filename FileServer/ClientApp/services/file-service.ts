@@ -13,19 +13,19 @@ export interface UploadResult {
  * Build a /files URL for a given logical path.
  * If no path is supplied, uses the current directory from the URL hash.
  */
-function buildFilesUrlForPath(path?: string): string {
+function buildFilesUrlForPath(prefix: string, path?: string, ): string {
     const effectivePath = (path ?? getCurrentPath()) || "/";
 
     if (effectivePath === "/" || effectivePath === "") {
         // Root directory
-        return `${FILES_BASE_URL}/`;
+        return `${prefix}/`;
     }
 
     // Trim leading slash for routing and URL-encode segments
     const trimmed = effectivePath.startsWith("/") ? effectivePath.substring(1) : effectivePath;
     const encoded = trimmed.split("/").map(encodeURIComponent).join("/");
 
-    return `${FILES_BASE_URL}/${encoded}`;
+    return `${prefix}/${encoded}`;
 }
 
 /**
@@ -33,7 +33,7 @@ function buildFilesUrlForPath(path?: string): string {
  * If `path` is omitted, it uses the current hash-based path.
  */
 export async function getFiles(): Promise<FileInfoModel[]> {
-    const url = buildFilesUrlForPath();
+    const url = buildFilesUrlForPath(FILES_BASE_URL);
 
     const response = await fetch(url);
 
@@ -56,20 +56,9 @@ export async function deleteEntry(
     name: string,
     directoryPath?: string
 ): Promise<boolean> {
-    let basePath = (directoryPath ?? getCurrentPath()) || "/";
+    const url = buildFilesUrlForPath(FILES_BASE_URL) + '/' + name;
 
-    // Normalize base path
-    if (!basePath.startsWith("/")) {
-        basePath = "/" + basePath;
-    }
-    if (basePath.endsWith("/") && basePath !== "/") {
-        basePath = basePath.slice(0, -1);
-    }
-
-    // For root, just use "/name"; otherwise "/dir/name"
-    const fullPath = basePath === "/" ? `/${name}` : `${basePath}/${name}`;
-
-    const url = buildFilesUrlForPath(fullPath);
+    console.log(url)
 
     const response = await fetch(url, {
         method: "DELETE"
@@ -79,6 +68,8 @@ export async function deleteEntry(
         console.error("Failed to delete entry:", response.status, response.statusText);
         return false;
     }
+
+    document.dispatchEvent(new Event("files-updated"));
 
     return true;
 }
@@ -93,12 +84,12 @@ export async function uploadFile(
     file: File,
     directoryPath?: string
 ): Promise<UploadResult | null> {
-    const url = buildFilesUrlForPath(directoryPath);
+    const url = buildFilesUrlForPath(FILES_BASE_URL, directoryPath);
 
     console.log(`Uploading to ${url}`)
 
     const formData = new FormData();
-    formData.append("files", file);
+    formData.append("file", file);
 
     const response = await fetch(url, {
         method: "POST",
@@ -110,5 +101,23 @@ export async function uploadFile(
         return null;
     }
 
+    document.dispatchEvent(new Event("files-updated"));
+
     return (await response.json()) as UploadResult;
+}
+
+export async function downloadFile(fileName: string) : Promise<Blob | null>
+{
+    const url = buildFilesUrlForPath("download") + '/' + fileName;
+
+    console.log(url)
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        console.error("Failed to fetch files:", response.status, response.statusText);
+        return null;
+    }
+
+    return await response.blob();
 }
