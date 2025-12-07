@@ -1,6 +1,6 @@
 ﻿import { getCurrentPath, getParentPath } from "./directoryHelper.js";
 import formatFileSize from "./formatFileSize.js";
-import { FileInfoModel } from "./models/file-info.js";
+import { FormattedFileInfo } from "./models/file-info.js";
 import { deleteEntry, downloadFile, getFiles } from "./services/file-service.js";
 
 
@@ -20,7 +20,12 @@ async function loadAndPopulateGrid(): Promise<void> {
         const existingRows = grid.querySelectorAll(".file-grid-row:not(.file-grid-header)");
         existingRows.forEach(row => row.remove());
 
-        if (getCurrentPath() !== "/")
+        const currentPath = getCurrentPath();
+
+        const rootPaths = new Set(["/", ""]);
+
+        // Only add ".." if we are not in a root path
+        if (!rootPaths.has(currentPath))
         {
             const clone = template.content.cloneNode(true) as HTMLElement;
 
@@ -59,7 +64,7 @@ async function loadAndPopulateGrid(): Promise<void> {
 }
 
 
-function createFileRow(item: FileInfoModel, currentPath: string): HTMLElement {
+function createFileRow(item: FormattedFileInfo, currentPath: string): HTMLElement {
     const template = document.getElementById("file-row-template") as HTMLTemplateElement;
     const fragment = template.content.cloneNode(true) as DocumentFragment;
 

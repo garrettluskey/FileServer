@@ -9,9 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { getCurrentPath } from "../directoryHelper.js";
 const FILES_BASE_URL = "/files";
+const DOWNLOAD_BASE_URL = "/download";
 /**
- * Build a /files URL for a given logical path.
- * If no path is supplied, uses the current directory from the URL hash.
+ * Build a base URL for a given logical path under a specific prefix.
+ *
+ * - `prefix` is the API base (e.g. "/files" or "/download").
+ * - `path` is the logical directory path (e.g. "/foo/bar").
+ *   If omitted, the current directory from the URL hash is used.
  */
 function buildFilesUrlForPath(prefix, path) {
     const effectivePath = (path !== null && path !== void 0 ? path : getCurrentPath()) || "/";
@@ -25,12 +29,20 @@ function buildFilesUrlForPath(prefix, path) {
     return `${prefix}/${encoded}`;
 }
 /**
- * List files/directories in a directory.
- * If `path` is omitted, it uses the current hash-based path.
+ * Utility to safely append a path segment to a base URL.
  */
-export function getFiles() {
+function appendSegment(baseUrl, segment) {
+    const encoded = encodeURIComponent(segment);
+    const separator = baseUrl.endsWith("/") ? "" : "/";
+    return `${baseUrl}${separator}${encoded}`;
+}
+/**
+ * List files/directories in a directory.
+ * If `directoryPath` is omitted, it uses the current hash-based path.
+ */
+export function getFiles(directoryPath) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = buildFilesUrlForPath(FILES_BASE_URL);
+        const url = buildFilesUrlForPath(FILES_BASE_URL, directoryPath);
         const response = yield fetch(url);
         if (!response.ok) {
             console.error("Failed to fetch files:", response.status, response.statusText);
@@ -44,12 +56,13 @@ export function getFiles() {
  *
  * @param name Name of the entry to delete (e.g. "foo.txt" or "subdir").
  * @param directoryPath Optional directory containing the entry.
- *                       Defaults to the current path.
+ *                      Defaults to the current path.
  */
 export function deleteEntry(name, directoryPath) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = buildFilesUrlForPath(FILES_BASE_URL) + '/' + name;
-        console.log(url);
+        const baseUrl = buildFilesUrlForPath(FILES_BASE_URL, directoryPath);
+        const url = appendSegment(baseUrl, name);
+        console.log("Deleting:", url);
         const response = yield fetch(url, {
             method: "DELETE"
         });
@@ -62,9 +75,9 @@ export function deleteEntry(name, directoryPath) {
     });
 }
 /**
- * Upload a files into the given directory.
+ * Upload a single file into the given directory.
  *
- * @param files The FileList from an <input type="file"> element.
+ * @param file The File from an <input type="file"> element.
  * @param directoryPath Optional target directory. Defaults to current path.
  */
 export function uploadFile(file, directoryPath) {
@@ -85,13 +98,21 @@ export function uploadFile(file, directoryPath) {
         return (yield response.json());
     });
 }
-export function downloadFile(fileName) {
+/**
+ * Download a file as a Blob from the given directory.
+ *
+ * @param name File name (e.g. "foo.txt").
+ * @param directoryPath Optional directory containing the file.
+ *                      Defaults to the current path.
+ */
+export function downloadFile(name, directoryPath) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = buildFilesUrlForPath("download") + '/' + fileName;
-        console.log(url);
+        const baseUrl = buildFilesUrlForPath(DOWNLOAD_BASE_URL, directoryPath);
+        const url = appendSegment(baseUrl, name);
+        console.log("Downloading:", url);
         const response = yield fetch(url);
         if (!response.ok) {
-            console.error("Failed to fetch files:", response.status, response.statusText);
+            console.error("Failed to download file:", response.status, response.statusText);
             return null;
         }
         return yield response.blob();

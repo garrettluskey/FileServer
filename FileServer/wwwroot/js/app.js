@@ -23,7 +23,10 @@ function loadAndPopulateGrid() {
             // Clear existing rows except the header
             const existingRows = grid.querySelectorAll(".file-grid-row:not(.file-grid-header)");
             existingRows.forEach(row => row.remove());
-            if (getCurrentPath() !== "/") {
+            const currentPath = getCurrentPath();
+            const rootPaths = new Set(["/", ""]);
+            // Only add ".." if we are not in a root path
+            if (!rootPaths.has(currentPath)) {
                 const clone = template.content.cloneNode(true);
                 const row = clone.querySelector(".file-grid-row");
                 const nameSpan = clone.querySelector(".file-name");

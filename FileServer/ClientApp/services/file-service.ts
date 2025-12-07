@@ -1,7 +1,8 @@
 ﻿import { getCurrentPath } from "../directoryHelper.js";
-import type { FileInfoModel } from "../models/file-info.js";
+import type { FormattedFileInfo } from "../models/file-info.js";
 
 const FILES_BASE_URL = "/files";
+const DOWNLOAD_BASE_URL = "/download";
 
 export interface UploadResult {
     fileName: string;
@@ -10,10 +11,13 @@ export interface UploadResult {
 }
 
 /**
- * Build a /files URL for a given logical path.
- * If no path is supplied, uses the current directory from the URL hash.
+ * Build a base URL for a given logical path under a specific prefix.
+ *
+ * - `prefix` is the API base (e.g. "/files" or "/download").
+ * - `path` is the logical directory path (e.g. "/foo/bar").
+ *   If omitted, the current directory from the URL hash is used.
  */
-function buildFilesUrlForPath(prefix: string, path?: string, ): string {
+function buildFilesUrlForPath(prefix: string, path?: string): string {
     const effectivePath = (path ?? getCurrentPath()) || "/";
 
     if (effectivePath === "/" || effectivePath === "") {
@@ -29,11 +33,20 @@ function buildFilesUrlForPath(prefix: string, path?: string, ): string {
 }
 
 /**
- * List files/directories in a directory.
- * If `path` is omitted, it uses the current hash-based path.
+ * Utility to safely append a path segment to a base URL.
  */
-export async function getFiles(): Promise<FileInfoModel[]> {
-    const url = buildFilesUrlForPath(FILES_BASE_URL);
+function appendSegment(baseUrl: string, segment: string): string {
+    const encoded = encodeURIComponent(segment);
+    const separator = baseUrl.endsWith("/") ? "" : "/";
+    return `${baseUrl}${separator}${encoded}`;
+}
+
+/**
+ * List files/directories in a directory.
+ * If `directoryPath` is omitted, it uses the current hash-based path.
+ */
+export async function getFiles(directoryPath?: string): Promise<FormattedFileInfo[]> {
+    const url = buildFilesUrlForPath(FILES_BASE_URL, directoryPath);
 
     const response = await fetch(url);
 
@@ -42,7 +55,7 @@ export async function getFiles(): Promise<FileInfoModel[]> {
         return [];
     }
 
-    return (await response.json()) as FileInfoModel[];
+    return (await response.json()) as FormattedFileInfo[];
 }
 
 /**
@@ -50,15 +63,16 @@ export async function getFiles(): Promise<FileInfoModel[]> {
  *
  * @param name Name of the entry to delete (e.g. "foo.txt" or "subdir").
  * @param directoryPath Optional directory containing the entry.
- *                       Defaults to the current path.
+ *                      Defaults to the current path.
  */
 export async function deleteEntry(
     name: string,
     directoryPath?: string
 ): Promise<boolean> {
-    const url = buildFilesUrlForPath(FILES_BASE_URL) + '/' + name;
+    const baseUrl = buildFilesUrlForPath(FILES_BASE_URL, directoryPath);
+    const url = appendSegment(baseUrl, name);
 
-    console.log(url)
+    console.log("Deleting:", url);
 
     const response = await fetch(url, {
         method: "DELETE"
@@ -75,9 +89,9 @@ export async function deleteEntry(
 }
 
 /**
- * Upload a files into the given directory.
+ * Upload a single file into the given directory.
  *
- * @param files The FileList from an <input type="file"> element.
+ * @param file The File from an <input type="file"> element.
  * @param directoryPath Optional target directory. Defaults to current path.
  */
 export async function uploadFile(
@@ -86,7 +100,7 @@ export async function uploadFile(
 ): Promise<UploadResult | null> {
     const url = buildFilesUrlForPath(FILES_BASE_URL, directoryPath);
 
-    console.log(`Uploading to ${url}`)
+    console.log(`Uploading to ${url}`);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -106,16 +120,26 @@ export async function uploadFile(
     return (await response.json()) as UploadResult;
 }
 
-export async function downloadFile(fileName: string) : Promise<Blob | null>
-{
-    const url = buildFilesUrlForPath("download") + '/' + fileName;
+/**
+ * Download a file as a Blob from the given directory.
+ *
+ * @param name File name (e.g. "foo.txt").
+ * @param directoryPath Optional directory containing the file.
+ *                      Defaults to the current path.
+ */
+export async function downloadFile(
+    name: string,
+    directoryPath?: string
+): Promise<Blob | null> {
+    const baseUrl = buildFilesUrlForPath(DOWNLOAD_BASE_URL, directoryPath);
+    const url = appendSegment(baseUrl, name);
 
-    console.log(url)
+    console.log("Downloading:", url);
 
     const response = await fetch(url);
 
     if (!response.ok) {
-        console.error("Failed to fetch files:", response.status, response.statusText);
+        console.error("Failed to download file:", response.status, response.statusText);
         return null;
     }
 
