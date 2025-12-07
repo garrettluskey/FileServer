@@ -1,4 +1,5 @@
 ﻿using FileServer.DirectorySizeCache;
+using FileServer.Services.FileSize;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FileServer.Services.DirectorySizeService;

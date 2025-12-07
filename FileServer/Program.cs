@@ -1,4 +1,5 @@
 using FileServer.Services.DirectorySizeService;
+using FileServer.Services.FileSize;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddBasePathService();
 builder.Services.AddDirectorySizeCache();
+builder.Services.AddFileSizeService();
 
 var app = builder.Build();
 

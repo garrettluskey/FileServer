@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Remove="ClientApp\FileSizeFormatter.ts" />
+    <TypeScriptCompile Remove="ClientApp\formatFileSize.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="ClientApp\FileSizeFormatter.ts" />
+    <None Include="ClientApp\formatFileSize.ts" />
   </ItemGroup>
 
   <ItemGroup>

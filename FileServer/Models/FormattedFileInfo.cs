@@ -1,6 +1,4 @@
-﻿using FileServer.Formatters;
-
-namespace FileServer.Models;
+﻿namespace FileServer.Models;
 
 public readonly struct FormattedFileInfo
 {

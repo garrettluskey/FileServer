@@ -13,10 +13,10 @@
     </header>
 
     <main id="app-root" class="app-root">
-        <!-- SPA views will be rendered here -->
-        <!-- Refresh button -->
+        <!-- Action buttons -->
         <div class="file-grid-actions">
-            <button id="refresh-btn" class="refresh-button">Refresh</button>
+            <button id="upload-btn" class="action-button">Upload</button>
+            <button id="refresh-btn" class="action-button">Refresh</button>
         </div>
 
         <!-- Grid container -->
@@ -33,11 +33,23 @@
 
         <!-- Template for a single file/folder row -->
         <template id="file-row-template">
-            <div class="file-grid-row" data-path="">
+            <div class="file-grid-row" data-path="" data-is-directory="false">
+                <!-- Type (e.g. "Folder" / "File" / extension) -->
                 <span class="file-grid-cell file-type"></span>
-                <span class="file-grid-cell file-name"></span>
+
+                <!-- Name (icon + clickable link) -->
+                <span class="file-grid-cell file-name">
+                    <span class="file-icon" aria-hidden="true"></span>
+                    <a href="#" class="file-link"></a>
+                </span>
+
+                <!-- Size (e.g. "1.2 MB", "-" for folders) -->
                 <span class="file-grid-cell file-size"></span>
-                <button type="button" class="file-delete">Delete</button>
+
+                <!-- Actions -->
+                <span class="file-grid-cell file-actions">
+                    <button type="button" class="file-delete">Delete</button>
+                </span>
             </div>
         </template>
     </main>
@@ -48,5 +60,6 @@
 
     <script type="module" src="/js/app.js"></script>
     <script type="module" src="/js/FileSizeFormatter.js"></script>
+    <script type="module" src="/js/upload.js"></script>
 </body>
 </html>

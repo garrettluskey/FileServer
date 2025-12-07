@@ -1,4 +1,4 @@
-﻿import { FileSizeFormatter } from "./FileSizeFormatter.js";
+﻿import formatFileSize from "./formatFileSize.js";
 
 // Matches the C# FormattedFileInfo struct as serialized by ASP.NET
 interface FormattedFileInfo {
@@ -9,10 +9,7 @@ interface FormattedFileInfo {
 
 const FILES_BASE_URL = "/files";
 
-// If you eventually support subdirectories, you can track it here
-let currentDirectory: string | null = null;
-
-async function loadAndPopulateGrid(directory: string | null = null): Promise<void> {
+async function loadAndPopulateGrid(): Promise<void> {
     const grid = document.getElementById("file-grid");
     const template = document.getElementById("file-row-template") as HTMLTemplateElement;
 
@@ -22,10 +19,9 @@ async function loadAndPopulateGrid(directory: string | null = null): Promise<voi
     }
 
     // Build URL: /files/ for root, /files/{directory} for a subdirectory
-    const url =
-        directory && directory.length > 0
-            ? `${FILES_BASE_URL}/${encodeURIComponent(directory)}`
-            : FILES_BASE_URL;
+    const url = FILES_BASE_URL + window.location.hash.substring(1)
+
+    console.log(url)
 
     try {
         const response = await fetch(url);
@@ -41,48 +37,111 @@ async function loadAndPopulateGrid(directory: string | null = null): Promise<voi
         const existingRows = grid.querySelectorAll(".file-grid-row:not(.file-grid-header)");
         existingRows.forEach(row => row.remove());
 
-        for (const item of items) {
+        function getParentPath(current: string): string {
+            current = current.replace(/^\/|#/g, ""); // remove leading slash/hash
+
+            if (current === "") return "/";
+
+            const parts = current.split("/").filter(Boolean);
+            parts.pop();
+
+            return parts.length > 0 ? "/" + parts.join("/") : "/";
+        }
+
+        const currentPath = window.location.hash.substring(1)
+
+        if (currentPath !== "/")
+        {
             const clone = template.content.cloneNode(true) as HTMLElement;
 
             const row = clone.querySelector(".file-grid-row") as HTMLElement;
             const nameSpan = clone.querySelector(".file-name") as HTMLElement;
             const typeSpan = clone.querySelector(".file-type") as HTMLElement;
-            const sizeSpan = clone.querySelector(".file-size") as HTMLElement;
-            const deleteBtn = clone.querySelector(".file-delete") as HTMLButtonElement;
 
-            // Name cell: icon + file/folder name
-            nameSpan.textContent = item.name;
+            // Clear name span and insert a hyperlink
+            nameSpan.textContent = "";
+            const link = document.createElement("a");
 
-            // Type cell: user-facing text
-            typeSpan.textContent = item.isDirectory ? "📁" : "📄";
+            const parentPath = getParentPath(currentPath);
 
-            sizeSpan.textContent = FileSizeFormatter.formatSize(item.size);
+            link.href = "#" + parentPath;
+            link.textContent = "..";
+            link.classList.add("file-up-link");
 
-            // Data-path for later use (e.g. navigation or delete)
-            row.dataset.path = item.name;
+            nameSpan.appendChild(link);
 
-            // Example delete handler (client-side only)
-            deleteBtn.addEventListener("click", () => {
-                console.log("Delete clicked:", item.name);
-                row.remove();
-            });
+            typeSpan.textContent = "↰";
 
             grid.appendChild(clone);
+        }
+
+        for (const item of items) {
+            
+            const row = createFileRow(item, currentPath);
+
+            grid.appendChild(row);
         }
     } catch (err) {
         console.error("Error while loading files:", err);
     }
 }
 
+interface FormattedFileInfo {
+    isDirectory: boolean;
+    name: string;
+    size: number;
+}
+
+function createFileRow(item: FormattedFileInfo, currentPath: string): HTMLElement {
+    const template = document.getElementById("file-row-template") as HTMLTemplateElement;
+    const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+    const row = fragment.querySelector(".file-grid-row") as HTMLElement;
+    const link = fragment.querySelector(".file-link") as HTMLAnchorElement;
+    const typeSpan = fragment.querySelector(".file-type") as HTMLElement;
+    const sizeSpan = fragment.querySelector(".file-size") as HTMLElement;
+    const deleteBtn = fragment.querySelector(".file-delete") as HTMLButtonElement;
+
+    // Build full path (e.g. /docs/file.txt)
+    const fullPath = currentPath.endsWith("/")
+        ? currentPath + item.name
+        : currentPath + "/" + item.name;
+
+    // Set dataset attributes
+    row.dataset.path = fullPath;
+    row.dataset.isDirectory = String(item.isDirectory);
+
+    // Setup link
+    link.textContent = item.name;
+    link.href = "#" + fullPath;
+
+    // Type
+    typeSpan.textContent = item.isDirectory ? "📁" : "📄";
+
+    // Size
+    sizeSpan.textContent = formatFileSize(item.size);
+
+    // Delete Button
+    deleteBtn.dataset.path = fullPath;
+
+    return row;
+}
+
+
 // Wire up initial load + refresh button
 document.addEventListener("DOMContentLoaded", () => {
     // initial load for root: /files/
-    loadAndPopulateGrid(currentDirectory);
+    loadAndPopulateGrid();
 
     const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
         refreshBtn.addEventListener("click", () => {
-            loadAndPopulateGrid(currentDirectory);
+            loadAndPopulateGrid();
         });
     }
 });
+
+window.addEventListener("hashchange", loadAndPopulateGrid);
+
+// Auto refresh on local file update
+document.addEventListener("files-updated", loadAndPopulateGrid);

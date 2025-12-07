@@ -138,15 +138,16 @@ body {
 }
 
 /* ------------------------------
-   Refresh Button Area
+   Action Button Area
 ------------------------------ */
 .file-grid-actions {
     display: flex;
     justify-content: flex-end;
     margin: 1rem 0;
+    gap: 4px;
 }
 
-.refresh-button {
+.action-button {
     background: #2563eb; /* Blue */
     color: white;
     border: none;
@@ -160,11 +161,11 @@ body {
     transition: background 0.2s ease, transform 0.1s ease;
 }
 
-    .refresh-button:hover {
+    .action-button:hover {
         background: #1d4ed8;
     }
 
-    .refresh-button:active {
+    .action-button:active {
         transform: scale(0.97);
         background: #1e40af;
     }
