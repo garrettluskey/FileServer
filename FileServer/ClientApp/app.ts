@@ -1,16 +1,18 @@
-﻿interface FileItem {
+﻿import { FileSizeFormatter } from "./FileSizeFormatter.js";
+
+// Matches the C# FormattedFileInfo struct as serialized by ASP.NET
+interface FormattedFileInfo {
+    isDirectory: boolean;
     name: string;
-    type: "file" | "folder";
+    size: number;
 }
 
-const testData: FileItem[] = [
-    { name: "README.md", type: "file" },
-    { name: "documents", type: "folder" },
-    { name: "photo.png", type: "file" },
-    { name: "projects", type: "folder" }
-];
+const FILES_BASE_URL = "/files";
 
-function populateGrid(items: FileItem[]) {
+// If you eventually support subdirectories, you can track it here
+let currentDirectory: string | null = null;
+
+async function loadAndPopulateGrid(directory: string | null = null): Promise<void> {
     const grid = document.getElementById("file-grid");
     const template = document.getElementById("file-row-template") as HTMLTemplateElement;
 
@@ -19,33 +21,68 @@ function populateGrid(items: FileItem[]) {
         return;
     }
 
-    for (const item of items) {
-        const clone = template.content.cloneNode(true) as HTMLElement;
+    // Build URL: /files/ for root, /files/{directory} for a subdirectory
+    const url =
+        directory && directory.length > 0
+            ? `${FILES_BASE_URL}/${encodeURIComponent(directory)}`
+            : FILES_BASE_URL;
 
-        const row = clone.querySelector(".file-grid-row") as HTMLElement;
-        const nameSpan = clone.querySelector(".file-name") as HTMLElement;
-        const typeSpan = clone.querySelector(".file-type") as HTMLElement;
-        const deleteBtn = clone.querySelector(".file-delete") as HTMLButtonElement;
+    try {
+        const response = await fetch(url);
 
-        // Name cell: inject icon + text
-        nameSpan.textContent = item.name;
+        if (!response.ok) {
+            console.error("Failed to fetch files:", response.status, response.statusText);
+            return;
+        }
 
-        // Type cell
-        typeSpan.textContent = item.type === "folder" ? "📁" : "📄";
+        const items = (await response.json()) as FormattedFileInfo[];
 
-        // Store path
-        row.dataset.path = item.name;
+        // Clear existing rows except the header
+        const existingRows = grid.querySelectorAll(".file-grid-row:not(.file-grid-header)");
+        existingRows.forEach(row => row.remove());
 
-        // Delete handler
-        deleteBtn.addEventListener("click", () => {
-            console.log("Delete clicked:", item.name);
-            row.remove();
-        });
+        for (const item of items) {
+            const clone = template.content.cloneNode(true) as HTMLElement;
 
-        grid.appendChild(clone);
+            const row = clone.querySelector(".file-grid-row") as HTMLElement;
+            const nameSpan = clone.querySelector(".file-name") as HTMLElement;
+            const typeSpan = clone.querySelector(".file-type") as HTMLElement;
+            const sizeSpan = clone.querySelector(".file-size") as HTMLElement;
+            const deleteBtn = clone.querySelector(".file-delete") as HTMLButtonElement;
+
+            // Name cell: icon + file/folder name
+            nameSpan.textContent = item.name;
+
+            // Type cell: user-facing text
+            typeSpan.textContent = item.isDirectory ? "📁" : "📄";
+
+            sizeSpan.textContent = FileSizeFormatter.formatSize(item.size);
+
+            // Data-path for later use (e.g. navigation or delete)
+            row.dataset.path = item.name;
+
+            // Example delete handler (client-side only)
+            deleteBtn.addEventListener("click", () => {
+                console.log("Delete clicked:", item.name);
+                row.remove();
+            });
+
+            grid.appendChild(clone);
+        }
+    } catch (err) {
+        console.error("Error while loading files:", err);
     }
 }
 
+// Wire up initial load + refresh button
 document.addEventListener("DOMContentLoaded", () => {
-    populateGrid(testData);
+    // initial load for root: /files/
+    loadAndPopulateGrid(currentDirectory);
+
+    const refreshBtn = document.getElementById("refresh-btn");
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+            loadAndPopulateGrid(currentDirectory);
+        });
+    }
 });

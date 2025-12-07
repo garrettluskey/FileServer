@@ -25,6 +25,7 @@
             <div class="file-grid-row file-grid-header">
                 <span class="file-grid-cell"></span>
                 <span class="file-grid-cell">Name</span>
+                <span class="file-grid-cell">Size</span>
                 <span class="file-grid-cell">Actions</span>
             </div>
             <!-- JS will insert rows here -->
@@ -35,6 +36,7 @@
             <div class="file-grid-row" data-path="">
                 <span class="file-grid-cell file-type"></span>
                 <span class="file-grid-cell file-name"></span>
+                <span class="file-grid-cell file-size"></span>
                 <button type="button" class="file-delete">Delete</button>
             </div>
         </template>
@@ -44,6 +46,7 @@
         <small>SPA demo with pure JavaScript</small>
     </footer>
 
-    <script src="/js/app.js"></script>
+    <script type="module" src="/js/app.js"></script>
+    <script type="module" src="/js/FileSizeFormatter.js"></script>
 </body>
 </html>

@@ -75,7 +75,7 @@ body {
 /* A row */
 .file-grid-row {
     display: grid;
-    grid-template-columns: 0.5fr 3fr 1fr;
+    grid-template-columns: 0.5fr 3fr 1fr 1fr;
     align-items: center;
     background: white;
     border: 1px solid #ddd;

@@ -13,8 +13,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Remove="ClientApp\FileSizeFormatter.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="ClientApp\app.js" />
     <Content Include="ClientApp\app.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ClientApp\FileSizeFormatter.ts" />
   </ItemGroup>
 
   <ItemGroup>
