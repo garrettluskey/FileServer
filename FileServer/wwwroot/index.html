@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+    <title>File Server</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <header class="app-header">
+        <h1>File Server</h1>
+        <nav class="nav">
+            <!-- These links control the SPA route via the hash -->
+            <a href="#/" data-link>Home</a>
+        </nav>
+    </header>
+
+    <main id="app-root" class="app-root">
+        <!-- SPA views will be rendered here -->
+
+        <!-- Grid container -->
+        <div id="file-grid" class="file-grid">
+            <!-- Header row -->
+            <div class="file-grid-row file-grid-header">
+                <span class="file-grid-cell">Name</span>
+                <span class="file-grid-cell">Type</span>
+                <span class="file-grid-cell">Actions</span>
+            </div>
+            <!-- JS will insert rows here -->
+        </div>
+
+        <!-- Template for a single file/folder row -->
+        <template id="file-row-template">
+            <div class="file-grid-row" data-path="">
+                <span class="file-grid-cell file-name"></span>
+                <span class="file-grid-cell file-type"></span>
+                <button type="button" class="file-delete">
+                    Delete
+                </button>
+            </div>
+        </template>
+    </main>
+
+    <footer class="app-footer">
+        <small>SPA demo with pure JavaScript</small>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

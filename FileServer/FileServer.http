@@ -1,0 +1,17 @@
+@FileServer_HostAddress = https://localhost:7071
+
+GET {{FileServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+
+###
+GET {{FileServer_HostAddress}}/files/
+Accept: application/json
+
+###
+GET {{FileServer_HostAddress}}/files/MyThings
+Accept: application/json
+
+###
+GET {{FileServer_HostAddress}}/files/DoesNotExist
+Accept: application/json

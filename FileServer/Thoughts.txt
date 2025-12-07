@@ -1,0 +1,20 @@
+﻿The TLDR of the project is create a webserver with some api that also serves a website
+
+static files will be fine for this
+website and api server could be separate but that adds quite a bit of complexity and is not required
+
+Needs to be in C# so ASP.NET would be the best option
+While looking through the templates I saw this Aspire template, seems interesting but may add too much complexity and time if used for this
+
+It would be nice to showcase the following skills:
+CI/CD - possibly host using github website
+Docker - can add build compexity vs a vs hosted app
+Dependency Injection - ASP.NET has a DI framework
+
+For the APIs RESTful API should suffice, refresh button for updates. If realtime data was required a websocket framework would be used
+
+Adding a user login with the standard access and refresh tokens would be a nice way of showing security skills but that adds a lot of development time with setting up an authentication server etc...
+
+Designing the project would be good, dependancy graph/api control flow
+
+Unit tests are a must
