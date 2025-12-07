@@ -1,4 +1,6 @@
-﻿import formatFileSize from "./formatFileSize.js";
+﻿import { getCurrentPath, getParentPath } from "./directoryHelper.js";
+import formatFileSize from "./formatFileSize.js";
+import { getFiles } from "./services/file-service.js";
 
 // Matches the C# FormattedFileInfo struct as serialized by ASP.NET
 interface FormattedFileInfo {
@@ -7,7 +9,7 @@ interface FormattedFileInfo {
     size: number;
 }
 
-const FILES_BASE_URL = "/files";
+
 
 async function loadAndPopulateGrid(): Promise<void> {
     const grid = document.getElementById("file-grid");
@@ -18,53 +20,30 @@ async function loadAndPopulateGrid(): Promise<void> {
         return;
     }
 
-    // Build URL: /files/ for root, /files/{directory} for a subdirectory
-    const url = FILES_BASE_URL + window.location.hash.substring(1)
-
-    console.log(url)
-
     try {
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            console.error("Failed to fetch files:", response.status, response.statusText);
-            return;
-        }
-
-        const items = (await response.json()) as FormattedFileInfo[];
+        const items = await getFiles();
 
         // Clear existing rows except the header
         const existingRows = grid.querySelectorAll(".file-grid-row:not(.file-grid-header)");
         existingRows.forEach(row => row.remove());
 
-        function getParentPath(current: string): string {
-            current = current.replace(/^\/|#/g, ""); // remove leading slash/hash
-
-            if (current === "") return "/";
-
-            const parts = current.split("/").filter(Boolean);
-            parts.pop();
-
-            return parts.length > 0 ? "/" + parts.join("/") : "/";
-        }
-
-        const currentPath = window.location.hash.substring(1)
-
-        if (currentPath !== "/")
+        if (getCurrentPath() !== "/")
         {
             const clone = template.content.cloneNode(true) as HTMLElement;
 
             const row = clone.querySelector(".file-grid-row") as HTMLElement;
             const nameSpan = clone.querySelector(".file-name") as HTMLElement;
             const typeSpan = clone.querySelector(".file-type") as HTMLElement;
+            const deleteBtn = clone.querySelector(".file-delete") as HTMLElement;
+
+            deleteBtn.remove();
+            
 
             // Clear name span and insert a hyperlink
             nameSpan.textContent = "";
             const link = document.createElement("a");
 
-            const parentPath = getParentPath(currentPath);
-
-            link.href = "#" + parentPath;
+            link.href = "#" + getParentPath();
             link.textContent = "..";
             link.classList.add("file-up-link");
 
@@ -77,7 +56,7 @@ async function loadAndPopulateGrid(): Promise<void> {
 
         for (const item of items) {
             
-            const row = createFileRow(item, currentPath);
+            const row = createFileRow(item, getCurrentPath());
 
             grid.appendChild(row);
         }
@@ -113,7 +92,12 @@ function createFileRow(item: FormattedFileInfo, currentPath: string): HTMLElemen
 
     // Setup link
     link.textContent = item.name;
-    link.href = "#" + fullPath;
+
+    if (item.isDirectory) {
+        link.href = "#" + fullPath;
+    } else {
+        // TODO setup download file
+    }
 
     // Type
     typeSpan.textContent = item.isDirectory ? "📁" : "📄";

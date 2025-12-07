@@ -1,4 +1,3 @@
-"use strict";
 // upload.ts
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -9,20 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-// The backend upload endpoint
-const UPLOAD_URL = "/files";
+import { uploadFile } from "./services/file-service.js";
 function initUploadButton() {
     const uploadBtn = document.getElementById("upload-btn");
     if (!uploadBtn) {
         console.error("Upload button not found!");
         return;
     }
-    // Build URL: /files/ for root, /files/{directory} for a subdirectory
     uploadBtn.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
         // Create a hidden file input dynamically
         const input = document.createElement("input");
         input.type = "file";
-        input.multiple = true; // allow multiple files
+        input.multiple = false;
         input.style.display = "none";
         document.body.appendChild(input);
         input.addEventListener("change", () => __awaiter(this, void 0, void 0, function* () {
@@ -30,29 +27,11 @@ function initUploadButton() {
                 document.body.removeChild(input);
                 return;
             }
-            const formData = new FormData();
-            for (const file of input.files) {
-                formData.append("files", file);
-            }
-            try {
-                const response = yield fetch(UPLOAD_URL, {
-                    method: "POST",
-                    body: formData,
-                });
-                if (!response.ok) {
-                    throw new Error(`Upload failed: ${response.status}`);
-                }
-                console.log("Upload complete!");
-                // Optional: trigger refresh event
-                document.dispatchEvent(new Event("files-updated"));
-            }
-            catch (err) {
-                console.error("Upload error:", err);
-            }
+            // Upload ONLY the first file
+            yield uploadFile(input.files[0]);
             document.body.removeChild(input);
         }));
-        // Simulate clicking the file dialog
-        input.click();
+        input.click(); // open file picker
     }));
 }
 // Initialize on DOM ready

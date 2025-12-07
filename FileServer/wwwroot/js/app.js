@@ -7,8 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { getCurrentPath, getParentPath } from "./directoryHelper.js";
 import formatFileSize from "./formatFileSize.js";
-const FILES_BASE_URL = "/files";
+import { getFiles } from "./services/file-service.js";
 function loadAndPopulateGrid() {
     return __awaiter(this, void 0, void 0, function* () {
         const grid = document.getElementById("file-grid");
@@ -17,38 +18,22 @@ function loadAndPopulateGrid() {
             console.error("Missing grid or template element.");
             return;
         }
-        // Build URL: /files/ for root, /files/{directory} for a subdirectory
-        const url = FILES_BASE_URL + window.location.hash.substring(1);
-        console.log(url);
         try {
-            const response = yield fetch(url);
-            if (!response.ok) {
-                console.error("Failed to fetch files:", response.status, response.statusText);
-                return;
-            }
-            const items = (yield response.json());
+            const items = yield getFiles();
             // Clear existing rows except the header
             const existingRows = grid.querySelectorAll(".file-grid-row:not(.file-grid-header)");
             existingRows.forEach(row => row.remove());
-            function getParentPath(current) {
-                current = current.replace(/^\/|#/g, ""); // remove leading slash/hash
-                if (current === "")
-                    return "/";
-                const parts = current.split("/").filter(Boolean);
-                parts.pop();
-                return parts.length > 0 ? "/" + parts.join("/") : "/";
-            }
-            const currentPath = window.location.hash.substring(1);
-            if (currentPath !== "/") {
+            if (getCurrentPath() !== "/") {
                 const clone = template.content.cloneNode(true);
                 const row = clone.querySelector(".file-grid-row");
                 const nameSpan = clone.querySelector(".file-name");
                 const typeSpan = clone.querySelector(".file-type");
+                const deleteBtn = clone.querySelector(".file-delete");
+                deleteBtn.remove();
                 // Clear name span and insert a hyperlink
                 nameSpan.textContent = "";
                 const link = document.createElement("a");
-                const parentPath = getParentPath(currentPath);
-                link.href = "#" + parentPath;
+                link.href = "#" + getParentPath();
                 link.textContent = "..";
                 link.classList.add("file-up-link");
                 nameSpan.appendChild(link);
@@ -56,7 +41,7 @@ function loadAndPopulateGrid() {
                 grid.appendChild(clone);
             }
             for (const item of items) {
-                const row = createFileRow(item, currentPath);
+                const row = createFileRow(item, getCurrentPath());
                 grid.appendChild(row);
             }
         }
@@ -82,7 +67,12 @@ function createFileRow(item, currentPath) {
     row.dataset.isDirectory = String(item.isDirectory);
     // Setup link
     link.textContent = item.name;
-    link.href = "#" + fullPath;
+    if (item.isDirectory) {
+        link.href = "#" + fullPath;
+    }
+    else {
+        // TODO setup download file
+    }
     // Type
     typeSpan.textContent = item.isDirectory ? "📁" : "📄";
     // Size
