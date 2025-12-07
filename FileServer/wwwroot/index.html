@@ -10,21 +10,21 @@
 <body>
     <header class="app-header">
         <h1>File Server</h1>
-        <nav class="nav">
-            <!-- These links control the SPA route via the hash -->
-            <a href="#/" data-link>Home</a>
-        </nav>
     </header>
 
     <main id="app-root" class="app-root">
         <!-- SPA views will be rendered here -->
+        <!-- Refresh button -->
+        <div class="file-grid-actions">
+            <button id="refresh-btn" class="refresh-button">Refresh</button>
+        </div>
 
         <!-- Grid container -->
         <div id="file-grid" class="file-grid">
             <!-- Header row -->
             <div class="file-grid-row file-grid-header">
+                <span class="file-grid-cell"></span>
                 <span class="file-grid-cell">Name</span>
-                <span class="file-grid-cell">Type</span>
                 <span class="file-grid-cell">Actions</span>
             </div>
             <!-- JS will insert rows here -->
@@ -33,11 +33,9 @@
         <!-- Template for a single file/folder row -->
         <template id="file-row-template">
             <div class="file-grid-row" data-path="">
-                <span class="file-grid-cell file-name"></span>
                 <span class="file-grid-cell file-type"></span>
-                <button type="button" class="file-delete">
-                    Delete
-                </button>
+                <span class="file-grid-cell file-name"></span>
+                <button type="button" class="file-delete">Delete</button>
             </div>
         </template>
     </main>
@@ -46,6 +44,6 @@
         <small>SPA demo with pure JavaScript</small>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 </html>

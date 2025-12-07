@@ -27,12 +27,16 @@ function populateGrid(items: FileItem[]) {
         const typeSpan = clone.querySelector(".file-type") as HTMLElement;
         const deleteBtn = clone.querySelector(".file-delete") as HTMLButtonElement;
 
-        // Populate data
+        // Name cell: inject icon + text
         nameSpan.textContent = item.name;
-        typeSpan.textContent = item.type;
+
+        // Type cell
+        typeSpan.textContent = item.type === "folder" ? "📁" : "📄";
+
+        // Store path
         row.dataset.path = item.name;
 
-        // Example delete handler
+        // Delete handler
         deleteBtn.addEventListener("click", () => {
             console.log("Delete clicked:", item.name);
             row.remove();
@@ -42,7 +46,6 @@ function populateGrid(items: FileItem[]) {
     }
 }
 
-// Run on page load
 document.addEventListener("DOMContentLoaded", () => {
     populateGrid(testData);
 });

@@ -1,0 +1,170 @@
+﻿/* ------------------------------
+   Global Styles
+------------------------------ */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f5f7;
+    color: #333;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ------------------------------
+   Layout
+------------------------------ */
+.app-header,
+.app-footer {
+    background: #1f2937;
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+    .app-header h1 {
+        font-size: 1.4rem;
+        margin: 0;
+    }
+
+.nav a {
+    color: #d1d5db;
+    text-decoration: none;
+    margin-left: 1rem;
+}
+
+    .nav a:hover {
+        color: white;
+    }
+
+.app-root {
+    flex: 1;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.app-footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+/* ------------------------------
+   File Grid
+------------------------------ */
+.file-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    margin-top: 1.5rem;
+}
+
+/* A row */
+.file-grid-row {
+    display: grid;
+    grid-template-columns: 0.5fr 3fr 1fr;
+    align-items: center;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+
+/* Header row */
+.file-grid-header {
+    background: #374151;
+    color: white;
+    font-weight: bold;
+}
+
+    .file-grid-header .file-grid-cell {
+        border: none;
+    }
+
+/* Cells */
+.file-grid-cell {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Hover effect for rows */
+.file-grid-row:not(.file-grid-header):hover {
+    background: #f1f5f9;
+}
+
+/* ------------------------------
+   Delete Button
+------------------------------ */
+.file-delete {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.7rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: 0.9rem;
+}
+
+    .file-delete:hover {
+        background: #b91c1c;
+    }
+
+    .file-delete:active {
+        background: #7f1d1d;
+    }
+
+/* Responsive tweak */
+@media (max-width: 600px) {
+    .file-grid-row {
+        grid-template-columns: 2fr 1fr auto;
+    }
+
+    .app-root {
+        padding: 0 0.5rem;
+    }
+}
+
+/* ------------------------------
+   Refresh Button Area
+------------------------------ */
+.file-grid-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 1rem 0;
+}
+
+.refresh-button {
+    background: #2563eb; /* Blue */
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+    .refresh-button:hover {
+        background: #1d4ed8;
+    }
+
+    .refresh-button:active {
+        transform: scale(0.97);
+        background: #1e40af;
+    }
