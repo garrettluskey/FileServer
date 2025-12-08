@@ -25,7 +25,7 @@ function loadAndPopulateGrid() {
             existingRows.forEach(row => row.remove());
             const currentPath = getCurrentPath();
             const rootPaths = new Set(["/", ""]);
-            // Only add ".." if we are not in a root path
+            // Only add parent link ".." if we are not in a root path
             if (!rootPaths.has(currentPath)) {
                 const clone = template.content.cloneNode(true);
                 const row = clone.querySelector(".file-grid-row");

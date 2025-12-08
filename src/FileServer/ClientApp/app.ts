@@ -24,7 +24,7 @@ async function loadAndPopulateGrid(): Promise<void> {
 
         const rootPaths = new Set(["/", ""]);
 
-        // Only add ".." if we are not in a root path
+        // Only add parent link ".." if we are not in a root path
         if (!rootPaths.has(currentPath))
         {
             const clone = template.content.cloneNode(true) as HTMLElement;

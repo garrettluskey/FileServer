@@ -1,4 +1,5 @@
-﻿using FileServer.Providers;
+﻿using FileServer.Models;
+using FileServer.Providers;
 using FileServer.Services.DirectorySizeService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +51,7 @@ public class FileControllerTests : IDisposable
     }
 
     [Fact]
-    public void Get_ReturnsDirectoriesAndFiles_WithinBasePath()
+    public void GetContents_ReturnsDirectoriesAndFiles_WithinBasePath()
     {
         // Arrange
         var subDir = Path.Combine(_tempRoot, "Sub");
@@ -60,24 +61,29 @@ public class FileControllerTests : IDisposable
         File.WriteAllText(filePath, "hello");
 
         var sizeProvider = new Mock<IDirectorySizeProvider>();
-
-        sizeProvider.Setup(x => x.GetDirectorySize(It.IsAny<DirectoryInfo>())).Returns(42);
+        sizeProvider
+            .Setup(x => x.GetDirectorySize(It.IsAny<DirectoryInfo>()))
+            .Returns(42);
 
         var controller = CreateController(sizeProvider.Object);
 
         // Act
-        var result = controller.Get("Sub").ToList();
+        var actionResult = controller.GetContents("Sub");
 
         // Assert
-        // 0 directories (no subdir under Sub) + 1 file
-        Assert.Single(result);
+        // Ensure it's a 200 OK with the expected payload
+        var okResult = Assert.IsType<OkObjectResult>(actionResult);
+        Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode ?? StatusCodes.Status200OK);
 
-        var fileInfo = result[0];
-        Assert.False(fileInfo.IsDirectory);
-        Assert.Equal("test.txt", fileInfo.Name);
-        Assert.Equal(new FileInfo(filePath).Length, fileInfo.Size);
-        // Optionally check status code (should still be 200)
-        Assert.Equal(StatusCodes.Status200OK, controller.Response.StatusCode);
+        var payload = Assert.IsAssignableFrom<IEnumerable<FormattedFileInfo>>(okResult.Value);
+        var list = payload.ToList();
+
+        // 0 directories (no subdir under Sub) + 1 file
+        var single = Assert.Single(list);
+
+        Assert.False(single.IsDirectory);
+        Assert.Equal("test.txt", single.Name);
+        Assert.Equal(new FileInfo(filePath).Length, single.Size);
     }
 
     [Fact]
@@ -87,11 +93,11 @@ public class FileControllerTests : IDisposable
         var controller = CreateController();
 
         // Act
-        var result = controller.Get("../evil").ToList();
+        var result = controller.GetContents("../evil");
 
         // Assert
-        Assert.Equal(StatusCodes.Status400BadRequest, controller.Response.StatusCode);
-        Assert.Empty(result);
+        var badRequest = Assert.IsType<BadRequestResult>(result);
+        Assert.Equal(StatusCodes.Status400BadRequest, badRequest.StatusCode);
     }
 
     [Fact]
@@ -101,11 +107,11 @@ public class FileControllerTests : IDisposable
         var controller = CreateController();
 
         // Act
-        var result = controller.Get("DoesNotExist").ToList();
+        var result = controller.GetContents("DoesNotExist");
 
         // Assert
-        Assert.Equal(StatusCodes.Status404NotFound, controller.Response.StatusCode);
-        Assert.Empty(result);
+        var notFound = Assert.IsType<NotFoundResult>(result);
+        Assert.Equal(StatusCodes.Status404NotFound, notFound.StatusCode);
     }
 
     [Fact]

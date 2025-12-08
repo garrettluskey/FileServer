@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FileServer\FileServer.csproj" />
+    <ProjectReference Include="..\..\src\FileServer\FileServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
