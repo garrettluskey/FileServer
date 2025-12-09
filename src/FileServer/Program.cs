@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// API version settings
 builder.Services.AddApiVersioning(options =>
 {
     options.DefaultApiVersion = new ApiVersion(1, 0);
@@ -14,7 +15,10 @@ builder.Services.AddApiVersioning(options =>
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
+
+// Internal Services
 builder.Services.AddBasePathService();
 builder.Services.AddDirectorySizeCache();
 builder.Services.AddFileSizeService();

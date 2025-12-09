@@ -1,5 +1,5 @@
 ﻿import type { FormattedFileInfo } from "../models/file-info.js";
-import { getCurrentPath } from "../shared/directoryHelper.js";
+import { getCurrentPath } from "../shared/directory-helper.js";
 
 const API_VERSION = 1;
 const API_BASE_URL = `/api/v${API_VERSION}`

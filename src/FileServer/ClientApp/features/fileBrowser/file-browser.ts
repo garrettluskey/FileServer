@@ -1,7 +1,7 @@
 ﻿import { FormattedFileInfo } from "../../models/file-info.js";
 import { deleteEntry, downloadFile, getFiles, searchFiles } from "../../services/file-service.js";
-import { getCurrentPath, getParentPath } from "../../shared/directoryHelper.js";
-import formatFileSize from "../../shared/formatFileSize.js";
+import { getCurrentPath, getParentPath } from "../../shared/directory-helper.js";
+import formatFileSize from "../../shared/format-file-size.js";
 import renderSearchBox from "./search.js";
 import renderUploadButton from "./upload.js";
 
