@@ -1,0 +1,21 @@
+@FileServer_HostAddress = https://localhost:7071/api/v1
+
+###
+GET {{FileServer_HostAddress}}/files/
+Accept: application/json
+
+###
+GET {{FileServer_HostAddress}}/files/MyThings
+Accept: application/json
+
+###
+GET {{FileServer_HostAddress}}/files/DoesNotExist
+Accept: application/json
+
+###
+GET {{FileServer_HostAddress}}/files/search?query=test
+Accept: application/json
+
+###
+GET {{FileServer_HostAddress}}/files/search?query=Nested
+Accept: application/json
