@@ -1,8 +1,8 @@
 ﻿// upload.ts
 
-import { uploadFile } from "./services/file-service.js";
+import { uploadFile } from "../../services/file-service.js";
 
-function initUploadButton() {
+export default function renderUploadButton() {
     const uploadBtn = document.getElementById("upload-btn") as HTMLButtonElement | null;
 
     if (!uploadBtn) {
@@ -35,6 +35,3 @@ function initUploadButton() {
         input.click(); // open file picker
     });
 }
-
-// Initialize on DOM ready
-document.addEventListener("DOMContentLoaded", initUploadButton);

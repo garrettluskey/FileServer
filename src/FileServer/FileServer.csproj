@@ -30,10 +30,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="ClientApp\formatFileSize.ts" />
+    <None Include="ClientApp\shared\formatFileSize.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.9.3">
       <PrivateAssets>all</PrivateAssets>

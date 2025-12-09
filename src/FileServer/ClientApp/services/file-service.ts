@@ -1,8 +1,12 @@
-﻿import { getCurrentPath } from "../directoryHelper.js";
-import type { FormattedFileInfo } from "../models/file-info.js";
+﻿import type { FormattedFileInfo } from "../models/file-info.js";
+import { getCurrentPath } from "../shared/directoryHelper.js";
 
-const FILES_BASE_URL = "/files";
-const DOWNLOAD_BASE_URL = "/download";
+const API_VERSION = 1;
+const API_BASE_URL = `/api/v${API_VERSION}`
+const FILES_BASE_URL = API_BASE_URL + "/files";
+
+const DOWNLOAD_BASE_URL = FILES_BASE_URL + "/download";
+const SEARCH_BASE_URL = FILES_BASE_URL + "/search";
 
 export interface UploadResult {
     fileName: string;
@@ -52,6 +56,26 @@ export async function getFiles(directoryPath?: string): Promise<FormattedFileInf
 
     if (!response.ok) {
         console.error("Failed to fetch files:", response.status, response.statusText);
+        return [];
+    }
+
+    return (await response.json()) as FormattedFileInfo[];
+}
+
+/**
+ * Searches the file system for a given file.
+ *
+ * @param query Query to use to search for files.
+ */
+export async function searchFiles(): Promise<FormattedFileInfo[]> {
+    const url = API_BASE_URL + window.location.hash.substring(1);
+
+    console.log(url)
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        console.error("Failed to search files:", response.status, response.statusText);
         return [];
     }
 

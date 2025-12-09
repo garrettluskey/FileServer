@@ -1,10 +1,17 @@
 using FileServer.Services.DirectorySizeService;
 using FileServer.Services.FileSize;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+});
 
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -24,10 +31,13 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllers();
+// Prepend "/api" and version to API urls
+var api = app.MapGroup("/api");
+api.MapControllers();
+
+app.UseRouting();
 
 // Serve web pages
 app.UseFileServer();
-app.UseRouting();
 
 app.Run();

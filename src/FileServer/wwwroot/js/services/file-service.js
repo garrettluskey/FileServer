@@ -7,9 +7,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { getCurrentPath } from "../directoryHelper.js";
-const FILES_BASE_URL = "/files";
-const DOWNLOAD_BASE_URL = "/download";
+import { getCurrentPath } from "../shared/directoryHelper.js";
+const API_VERSION = 1;
+const API_BASE_URL = `/api/v${API_VERSION}`;
+const FILES_BASE_URL = API_BASE_URL + "/files";
+const DOWNLOAD_BASE_URL = FILES_BASE_URL + "/download";
+const SEARCH_BASE_URL = FILES_BASE_URL + "/search";
 /**
  * Build a base URL for a given logical path under a specific prefix.
  *
@@ -46,6 +49,23 @@ export function getFiles(directoryPath) {
         const response = yield fetch(url);
         if (!response.ok) {
             console.error("Failed to fetch files:", response.status, response.statusText);
+            return [];
+        }
+        return (yield response.json());
+    });
+}
+/**
+ * Searches the file system for a given file.
+ *
+ * @param query Query to use to search for files.
+ */
+export function searchFiles() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = API_BASE_URL + window.location.hash.substring(1);
+        console.log(url);
+        const response = yield fetch(url);
+        if (!response.ok) {
+            console.error("Failed to search files:", response.status, response.statusText);
             return [];
         }
         return (yield response.json());
