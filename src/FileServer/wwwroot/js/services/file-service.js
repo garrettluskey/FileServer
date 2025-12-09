@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { getCurrentPath } from "../shared/directoryHelper.js";
+import { getCurrentPath } from "../shared/directory-helper.js";
 const API_VERSION = 1;
 const API_BASE_URL = `/api/v${API_VERSION}`;
 const FILES_BASE_URL = API_BASE_URL + "/files";

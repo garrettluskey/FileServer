@@ -484,3 +484,4 @@ $RECYCLE.BIN/
 *.swp
 
 node_modules/
+wwwroot/js/

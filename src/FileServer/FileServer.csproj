@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="ClientApp\shared\formatFileSize.ts" />
+    <None Include="ClientApp\shared\format-file-size.ts" />
   </ItemGroup>
 
   <ItemGroup>
