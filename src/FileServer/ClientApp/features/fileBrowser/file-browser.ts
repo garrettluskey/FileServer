@@ -23,8 +23,11 @@ async function renderFileBrowser(files: FormattedFileInfo[]): Promise<void> {
 
         const rootPaths = new Set(["/", ""]);
 
+        const rootLink = createRootLink();
+        grid.appendChild(rootLink);
+
         // Only add parent link ".." if we are not in a root path
-        if (!rootPaths.has(currentPath)) {
+        if (!rootPaths.has(currentPath) && !isSearchRoute()) {
             const parentLink = createParentLink();
             grid.appendChild(parentLink);
         }
@@ -40,6 +43,32 @@ async function renderFileBrowser(files: FormattedFileInfo[]): Promise<void> {
     } catch (err) {
         console.error("Error while loading files:", err);
     }
+}
+
+function createRootLink(): DocumentFragment {
+    const template = document.getElementById("file-row-template") as HTMLTemplateElement;
+    const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+    const nameSpan = fragment.querySelector(".file-name") as HTMLElement;
+    const typeSpan = fragment.querySelector(".file-type") as HTMLElement;
+    const deleteBtn = fragment.querySelector(".file-delete") as HTMLElement;
+
+    deleteBtn.remove();
+
+
+    // Clear name span and insert a hyperlink
+    nameSpan.textContent = "";
+    const link = document.createElement("a");
+
+    link.href = "#";
+    link.textContent = "/";
+    link.classList.add("file-up-link");
+
+    nameSpan.appendChild(link);
+
+    typeSpan.textContent = "🏠";
+
+    return fragment;
 }
 
 function createParentLink(): DocumentFragment

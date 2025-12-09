@@ -25,8 +25,10 @@ function renderFileBrowser(files) {
             existingRows.forEach(row => row.remove());
             const currentPath = getCurrentPath();
             const rootPaths = new Set(["/", ""]);
+            const rootLink = createRootLink();
+            grid.appendChild(rootLink);
             // Only add parent link ".." if we are not in a root path
-            if (!rootPaths.has(currentPath)) {
+            if (!rootPaths.has(currentPath) && !isSearchRoute()) {
                 const parentLink = createParentLink();
                 grid.appendChild(parentLink);
             }
@@ -39,6 +41,23 @@ function renderFileBrowser(files) {
             console.error("Error while loading files:", err);
         }
     });
+}
+function createRootLink() {
+    const template = document.getElementById("file-row-template");
+    const fragment = template.content.cloneNode(true);
+    const nameSpan = fragment.querySelector(".file-name");
+    const typeSpan = fragment.querySelector(".file-type");
+    const deleteBtn = fragment.querySelector(".file-delete");
+    deleteBtn.remove();
+    // Clear name span and insert a hyperlink
+    nameSpan.textContent = "";
+    const link = document.createElement("a");
+    link.href = "#";
+    link.textContent = "/";
+    link.classList.add("file-up-link");
+    nameSpan.appendChild(link);
+    typeSpan.textContent = "🏠";
+    return fragment;
 }
 function createParentLink() {
     const template = document.getElementById("file-row-template");
