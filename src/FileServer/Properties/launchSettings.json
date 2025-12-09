@@ -28,7 +28,7 @@
       "publishAllPorts": true,
       "useSSL": true,
 
-      "containerRunArguments": "-v ./SampleData:/app/data"
+      "containerRunArguments": "-v .\\src\\FileServer\\SampleData:/app/data"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"
